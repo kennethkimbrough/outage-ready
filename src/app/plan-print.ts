@@ -57,7 +57,7 @@ export function renderPrintPlan(root: Element, plan: Plan): void {
       <ul>
         ${reports.map(({ scenario, report }) => {
           const r = report.result;
-          const first = r.failsFirst[0];
+          const first = r.failsFirst.find((n) => n.kind === "need" && n.severity >= 3) ?? r.failsFirst[0];
           return html`<li><strong>${scenario.name}</strong> (${formatHours(r.durationHours)}): ${r.holdsFullDuration ? "covered" : `covered for ${formatHours(r.sustainableHours)}`}${first ? `; first to fail: ${first.label}${first.failsAt === 0 ? " immediately" : ` at ${formatHours(first.failsAt!)}`}` : ""}.</li>`;
         })}
       </ul>
