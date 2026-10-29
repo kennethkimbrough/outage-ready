@@ -139,7 +139,7 @@ small, .muted { color: var(--ink-2); }
 .hero .big.fail { color: var(--amber); }
 .hero .big.danger { color: var(--red); }
 .duration { display: flex; align-items: center; gap: .6rem; margin-top: .75rem; }
-.duration input[type=range] { flex: 1; min-height: var(--tap); accent-color: var(--accent); }
+.duration input[type=range] { flex: 1; width: auto; }
 .duration output { font-variant-numeric: tabular-nums; min-width: 5.5rem; text-align: right; font-weight: 600; }
 
 /* Timeline chart */
@@ -178,6 +178,8 @@ input[type=text], input[type=number], input[type=tel], select, textarea {
   background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm);
 }
 input[type=number] { font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; min-height: var(--tap); accent-color: var(--accent); margin: 0; }
+.field input[type=range] + output { display: block; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
 .row { display: grid; gap: .75rem; grid-template-columns: 1fr 1fr; }
 .row-3 { grid-template-columns: repeat(3, 1fr); }
 .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
