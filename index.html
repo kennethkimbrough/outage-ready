@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Outage Ready</title>
+  <meta name="description" content="What your household can sustain in an outage, what fails first, and what to do next. Works offline, data stays on your device.">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f4f6f8" media="(prefers-color-scheme: light)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Outage Ready">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="Outage Ready home">
+      <svg width="26" height="26" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="96" fill="#0f172a"/><path d="M296 72 L168 288 h88 l-40 152 L344 224 h-88 z" fill="#f59e0b"/></svg>
+      <span>Outage Ready</span>
+    </a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#/">Scenarios</a>
+      <a href="#/setup">Household</a>
+      <a href="#/checklist">Checklist</a>
+      <a href="#/print">Print plan</a>
+    </nav>
+    <span class="offline-badge" id="offline-badge" hidden>Offline — everything still works</span>
+  </header>
+  <main id="main" class="page" aria-live="polite"></main>
+  <nav class="tabbar" aria-label="Sections">
+    <a href="#/" data-route="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4v7H3zm7-6h4v13h-4zm7-4h4v17h-4z"/></svg><span>Scenarios</span></a>
+    <a href="#/setup" data-route="setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z"/></svg><span>Household</span></a>
+    <a href="#/checklist" data-route="checklist"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg><span>Checklist</span></a>
+    <a href="#/print" data-route="print"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3zm-3 11H8v-5h8zm3-7a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM18 3H6v4h12z"/></svg><span>Print</span></a>
+  </nav>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/app/main.js"></script>
+</body>
+</html>
