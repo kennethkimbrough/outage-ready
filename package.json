@@ -1,0 +1,19 @@
+{
+  "name": "outage-ready",
+  "version": "0.1.0",
+  "description": "Offline-first household outage planner: what you can sustain, what fails first, what to do next.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/stamp-sw.mjs",
+    "build:test": "tsc -p tsconfig.test.json",
+    "test": "npm run build:test && node --test \"build/tests/**/*.test.js\"",
+    "serve": "node scripts/serve.mjs",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "typescript": "^5.6.0"
+  },
+  "license": "MIT"
+}

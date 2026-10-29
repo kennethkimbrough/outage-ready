@@ -1,0 +1,6 @@
+node_modules/
+build/
+public/js/
+test-results/
+playwright-report/
+.DS_Store
