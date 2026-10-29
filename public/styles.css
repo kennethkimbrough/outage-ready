@@ -195,7 +195,9 @@ input[type=number] { font-variant-numeric: tabular-nums; }
 .stepper button { width: var(--tap); height: var(--tap); border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface-2); color: var(--ink); font-size: 1.4rem; cursor: pointer; }
 .stepper output { min-width: 3rem; text-align: center; font-weight: 700; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
 .sub-list { margin: .5rem 0 0; padding: 0; list-style: none; }
-.sub-list li { display: grid; grid-template-columns: 1fr auto; gap: .5rem; align-items: center; padding: .4rem 0; border-top: 1px solid var(--line); }
+.sub-list li { display: flex; flex-direction: column; gap: .35rem; padding: .6rem 0; border-top: 1px solid var(--line); }
+.sub-list li > .btn { align-self: flex-end; min-height: 40px; padding: .3rem .6rem; }
+.sub-list li > .row { width: 100%; }
 
 /* Buttons */
 .btn {
