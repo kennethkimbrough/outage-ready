@@ -29,7 +29,7 @@ export function renderHome(root, plan) {
         const cls = verdictClass(report);
         const r = report.result;
         const pct = Math.round((r.sustainableHours / r.durationHours) * 100);
-        const first = r.failsFirst[0];
+        const first = r.failsFirst.find((n) => n.kind === "need" && n.severity >= 3) ?? r.failsFirst[0];
         return html `
             <a class="card scenario" href="#/scenario/${scenario.id}">
               <h2>${scenario.name}</h2>
