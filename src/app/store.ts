@@ -97,6 +97,7 @@ export async function savePlan(plan: Plan): Promise<void> {
   cached = plan;
   const ok = await idbPut(plan);
   if (!ok) lsPut(plan);
+  if (typeof document !== "undefined") document.body.dataset.savedAt = plan.updatedAt;
   for (const l of listeners) l(plan);
 }
 
