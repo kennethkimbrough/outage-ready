@@ -1,21 +1,23 @@
 name: Deploy to GitHub Pages
 
+# Builds the site, runs the end-to-end checks (including the offline reload),
+# and publishes public/ to the gh-pages branch, which GitHub Pages serves at
+# https://kennethkimbrough.github.io/outage-ready/
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,18 +37,30 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
-      - uses: actions/configure-pages@v5
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          enablement: true
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-  deploy:
-    needs: build
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          user_name: Kenneth Kimbrough
+          user_email: 146112017+kennethkimbrough@users.noreply.github.com
+          commit_message: "Deploy site"
+
+  verify:
+    needs: build-and-deploy
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Wait for the site to answer
+        run: |
+          url="https://kennethkimbrough.github.io/outage-ready/"
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$url")
+            echo "attempt $i: HTTP $code"
+            if [ "$code" = "200" ] && curl -s "$url" | grep -q "Outage Ready"; then
+              echo "::notice title=Live site::$url is serving the app (HTTP 200)"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error title=Live site::$url did not return the app (last HTTP $code). Enable GitHub Pages from the gh-pages branch in Settings > Pages."
+          exit 1
