@@ -33,7 +33,7 @@ export function renderPrintPlan(root: Element, plan: Plan): void {
       <h2>Emergency contacts</h2>
       ${inv.contacts.length ? html`
         <ul class="contacts list">
-          ${inv.contacts.map((c) => html`<li><span><strong>${c.name || "—"}</strong> <span class="muted">${c.relation}${c.outOfArea ? " · out of area" : ""}</span></span><span class="phone">${c.phone}</span></li>`)}
+          ${inv.contacts.map((c) => html`<li><span><strong>${c.name || "(no name)"}</strong> <span class="muted">${c.relation}${c.outOfArea ? " · out of area" : ""}</span></span><span class="phone">${c.phone}</span></li>`)}
         </ul>` : html`<p>No contacts entered. Write them here: <span class="fill"></span> <span class="fill"></span></p>`}
       <p>Local emergency number: <span class="fill"></span> &nbsp; Meeting point near home: <span class="fill"></span> &nbsp; Meeting point outside the area: <span class="fill"></span></p>
 
@@ -46,7 +46,7 @@ export function renderPrintPlan(root: Element, plan: Plan): void {
           <dt>Light</dt><dd>${inv.flashlights} flashlight${inv.flashlights === 1 ? "" : "s"}, ${inv.spareBatteries} spare batteries</dd>
           <dt>Radio</dt><dd>${inv.batteryRadio ? "yes" : "none"}</dd>
           <dt>Cooking</dt><dd>${hh.home.cooking}${hh.home.cooking === "camp-stove" ? ` (${inv.cookingFuelHours} h fuel)` : ""}</dd>
-          <dt>Water supply</dt><dd>${hh.home.waterSupply === "electric-pump" ? "electric pump — stops with the power" : hh.home.waterSupply}</dd>
+          <dt>Water supply</dt><dd>${hh.home.waterSupply === "electric-pump" ? "electric pump (stops with the power)" : hh.home.waterSupply}</dd>
           <dt>Vehicle</dt><dd>${inv.vehicle.present ? `fuel ${Math.round(inv.vehicle.fuelFraction * 100)}%` : "none"}</dd>
           <dt>Cash</dt><dd>${inv.cashOnHand || "none"}</dd>
           ${inv.medications.map((m) => html`<dt>${m.label || "Medication"}</dt><dd>${m.dosesPerDay > 0 ? `${Math.floor(m.dosesOnHand / m.dosesPerDay)} days` : `${m.dosesOnHand} doses`}${m.requiresRefrigeration ? ", needs fridge" : ""}</dd>`)}

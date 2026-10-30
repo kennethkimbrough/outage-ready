@@ -75,7 +75,7 @@ test("scenario cards, timeline, tasks and print plan render for the sample", asy
 
   await page.goto("/#/assumptions");
   await expect(page.getByText("Drinking and sanitation water per person per day")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Ready.gov — Water" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ready.gov: Water" }).first()).toBeVisible();
 });
 
 test("changing an assumption changes the result", async ({ page }) => {

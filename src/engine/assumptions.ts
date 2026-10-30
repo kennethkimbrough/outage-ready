@@ -14,7 +14,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     label: "Drinking and sanitation water per person per day",
     value: 3.785,
     unit: "L",
-    source: { title: "Ready.gov — Water", url: "https://www.ready.gov/water" },
+    source: { title: "Ready.gov: Water", url: "https://www.ready.gov/water" },
     note: "Ready.gov: store at least one gallon (3.785 L) per person per day for several days.",
   },
   {
@@ -22,7 +22,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     label: "Water multiplier in very hot weather",
     value: 2,
     unit: "×",
-    source: { title: "Ready.gov — Water", url: "https://www.ready.gov/water" },
+    source: { title: "Ready.gov: Water", url: "https://www.ready.gov/water" },
     note: "Ready.gov: in very hot temperatures, water needs can double.",
   },
   {
@@ -31,7 +31,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 0,
     unit: "L",
     source: {
-      title: "CDC — Build a pet disaster preparedness kit",
+      title: "CDC: Build a pet disaster preparedness kit",
       url: "https://www.cdc.gov/healthy-pets/emergency-preparedness/preparedness-kit.html",
     },
     note: "CDC recommends a two-week supply of water for each animal but gives no daily amount. Enter what your pets actually drink.",
@@ -42,7 +42,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 4,
     unit: "h",
     source: {
-      title: "FDA — Food and water safety during power outages and floods",
+      title: "FDA: Food and water safety during power outages and floods",
       url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods",
     },
     note: "FDA: the refrigerator will keep food cold for about 4 hours if it is unopened.",
@@ -53,7 +53,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 48,
     unit: "h",
     source: {
-      title: "FDA — Food and water safety during power outages and floods",
+      title: "FDA: Food and water safety during power outages and floods",
       url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods",
     },
     note: "FDA: a full freezer holds its temperature for approximately 48 hours; 24 hours if half full.",
@@ -64,7 +64,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 24,
     unit: "h",
     source: {
-      title: "FDA — Food and water safety during power outages and floods",
+      title: "FDA: Food and water safety during power outages and floods",
       url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods",
     },
   },
@@ -74,7 +74,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 4,
     unit: "h",
     source: {
-      title: "FDA — Food and water safety during power outages and floods",
+      title: "FDA: Food and water safety during power outages and floods",
       url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods",
     },
     note: "FDA: discard refrigerated perishables that have been above 40°F for 4 hours or more.",
@@ -85,7 +85,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 28,
     unit: "days",
     source: {
-      title: "FDA — Insulin storage and switching between products in an emergency",
+      title: "FDA: Insulin storage and switching between products in an emergency",
       url: "https://www.fda.gov/drugs/emergency-preparedness-drugs/information-regarding-insulin-storage-and-switching-between-products-emergency",
     },
     note: "Applies to insulin specifically. Other refrigerated medications vary: check the label or ask a pharmacist.",
@@ -96,7 +96,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 86,
     unit: "°F",
     source: {
-      title: "FDA — Insulin storage and switching between products in an emergency",
+      title: "FDA: Insulin storage and switching between products in an emergency",
       url: "https://www.fda.gov/drugs/emergency-preparedness-drugs/information-regarding-insulin-storage-and-switching-between-products-emergency",
     },
   },
@@ -106,7 +106,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 0.7,
     unit: "×",
     source: {
-      title: "Anker — Why is the rated capacity of power banks lower than expected?",
+      title: "Anker: Why is the rated capacity of power banks lower than expected?",
       url: "https://service.anker.com/article-description/Why-is-the-Rated-Capacity-of-Power-Banks-Lower-Than-Expected",
     },
     note: "Rated mAh is at 3.7 V cell voltage. Anker's worked example applies ~82% converter efficiency and ~85% charging efficiency, about 0.70 overall.",
@@ -117,7 +117,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 3.7,
     unit: "V",
     source: {
-      title: "Anker — Why is the rated capacity of power banks lower than expected?",
+      title: "Anker: Why is the rated capacity of power banks lower than expected?",
       url: "https://service.anker.com/article-description/Why-is-the-Rated-Capacity-of-Power-Banks-Lower-Than-Expected",
     },
   },
@@ -127,7 +127,7 @@ export const DEFAULT_ASSUMPTIONS: Assumption[] = [
     value: 18.5,
     unit: "Wh",
     source: {
-      title: "Anker — Why is the rated capacity of power banks lower than expected?",
+      title: "Anker: Why is the rated capacity of power banks lower than expected?",
       url: "https://service.anker.com/article-description/Why-is-the-Rated-Capacity-of-Power-Banks-Lower-Than-Expected",
     },
     note: "Anker's example smartphone battery. Check your phone's spec sheet for the real figure.",
