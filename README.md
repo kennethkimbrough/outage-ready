@@ -31,6 +31,20 @@ the first visit, and keeps every byte of data on your device.
 Screenshots come from the Playwright suite, which also reloads the app with the
 network disabled to confirm the service worker serves it.
 
+## What I built, decided and learned
+
+- **Built:** an offline-first app that plays an outage forward hour by hour for
+  a specific household and shows what fails first, why, and what to do now. It
+  installs on any device and keeps all data on it.
+- **Hardest decision:** modelling the home as a chain of dependencies instead of
+  a checklist of supplies. It made the engine harder to write, but it is the
+  only way to see that the same twelve litres of water lasts a day and a half
+  in one home and is the only drinking water from the first minute in another.
+- **What I learned:** the idea worth building came from studying what already
+  exists. Supply trackers already count days of food and water; none of them
+  follow the dependencies inside a real home, and that gap became the core of
+  the app.
+
 ## Why it is different
 
 Supply trackers that report "days of readiness" exist (see
