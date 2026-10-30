@@ -176,6 +176,27 @@ test("a need the home can never meet says why instead of giving a chain", () => 
   assert.equal(cooling.reason, "no fan or air conditioning in this home");
 });
 
+test("a home on bottled water draws on its stored water from the first hour unless it can buy more", () => {
+  const hh = emptyHousehold();
+  hh.home.waterSupply = "bottled-only";
+  const inv = emptyInventory();
+  inv.waterLiters = 3.785; // one person-day
+  // Shops open and the power on: card payments work, so nothing is drawn down.
+  const comms = simulate(hh, inv, getScenario("comms", 48));
+  assert.equal(comms.stocks.find((s) => s.id === "stored-water")!.depletedAt, null);
+  assert.equal(comms.nodes.find((n) => n.id === "need:hydration")!.failsAt, null);
+  // Power out and no cash: nothing can be bought, so the bottles are the only supply.
+  const power = simulate(hh, inv, getScenario("power", 48));
+  assert.equal(power.stocks.find((s) => s.id === "stored-water")!.depletedAt, 24);
+  assert.equal(power.nodes.find((n) => n.id === "need:hydration")!.failsAt, 24);
+  // With cash on hand the shops still sell water.
+  const cash = simulate(hh, { ...inv, cashOnHand: 50 }, getScenario("power", 48));
+  assert.equal(cash.nodes.find((n) => n.id === "need:hydration")!.failsAt, null);
+  // A gravity-fed home with the same bottle is unaffected by a power cut.
+  hh.home.waterSupply = "gravity";
+  assert.equal(simulate(hh, inv, getScenario("power", 48)).nodes.find((n) => n.id === "need:hydration")!.failsAt, null);
+});
+
 test("the headline need is the earliest critical one, or the earliest of any kind when nothing critical fails", () => {
   const plan = samplePlan();
   const storm = simulate(plan.household, plan.inventory, getScenario("storm", 96));

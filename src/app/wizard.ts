@@ -73,7 +73,7 @@ export function renderWizard(root: Element, plan: Plan, step: StepIndex = 0): vo
           <div class="choice">
             ${choice("waterSupply", "gravity", hh.home.waterSupply, "Mains pressure or a rooftop tank", "Keeps flowing without power, at least for a while.")}
             ${choice("waterSupply", "electric-pump", hh.home.waterSupply, "An electric pump or a well", "Common in apartment blocks and houses with wells. Stops the moment the power does.")}
-            ${choice("waterSupply", "bottled-only", hh.home.waterSupply, "Bottled or delivered water only", "")}
+            ${choice("waterSupply", "bottled-only", hh.home.waterSupply, "Bottled or delivered water only", "You drink bottled water even when the tap runs, so your stored water counts from the first hour.")}
           </div>
         </fieldset>
         <fieldset class="field"><span>Cooking</span>

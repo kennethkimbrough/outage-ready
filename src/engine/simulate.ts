@@ -225,11 +225,14 @@ export function simulate(
       level["fridge-cold"] = household.home.hasFridge ? A["fridge.safeHoursUnopened"]! : 0;
     }
 
-    // Consumption for this hour.
-    if (!tapOk) level["stored-water"] = Math.max(0, level["stored-water"]! - waterPerHour);
+    // Consumption for this hour. A home that drinks bottled water draws on its
+    // stored supply whenever it cannot buy more; other homes only when the tap is off.
+    const canBuy = availability.get("buying") ?? false;
+    const drawStoredWater = household.home.waterSupply === "bottled-only" ? !canBuy : !tapOk;
+    if (drawStoredWater) level["stored-water"] = Math.max(0, level["stored-water"]! - waterPerHour);
     if (level["perishable-food"]! > 0) {
       level["perishable-food"] = Math.max(0, level["perishable-food"]! - foodPerHour);
-    } else if (!(availability.get("buying") ?? false)) {
+    } else if (!canBuy) {
       level["nonperishable-food"] = Math.max(0, level["nonperishable-food"]! - foodPerHour);
     }
     if (!homePower && inventory.phones > 0) {

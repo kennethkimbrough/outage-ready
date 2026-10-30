@@ -82,7 +82,14 @@ export function buildGraph(household: Household, inventory: Inventory): Graph {
     id: "water-at-tap", kind: "capability", label: "Water from the tap", requires: tapReq,
     why: home.waterSupply === "electric-pump" ? "Your water comes through an electric pump, so it stops with the power." : undefined,
   });
-  add({ id: "drinking-water", kind: "capability", label: "Drinking water", requires: { any: ["water-at-tap", "stored-water"] } });
+  if (home.waterSupply === "bottled-only") {
+    add({
+      id: "drinking-water", kind: "capability", label: "Drinking water", requires: { any: ["stored-water", "buying"] },
+      why: "This home drinks bottled water, so the stored supply is used from the first hour unless more can be bought.",
+    });
+  } else {
+    add({ id: "drinking-water", kind: "capability", label: "Drinking water", requires: { any: ["water-at-tap", "stored-water"] } });
+  }
 
   add({ id: "refrigeration", kind: "capability", label: "Refrigeration", requires: { any: ["home-power", "fridge-cold"] },
     why: "A closed fridge stays cold for a few hours after the power goes; after that it depends on power." });

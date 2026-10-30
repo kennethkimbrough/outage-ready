@@ -64,7 +64,8 @@ export function prioritize(
   // Water.
   const waterNeeded = result.dailyWaterLiters * days;
   const waterFail = fails("need:hydration");
-  if (waterFail !== null || (hz("tap-water") && inventory.waterLiters < waterNeeded)) {
+  const drinksStoredWater = hz("tap-water") || household.home.waterSupply === "bottled-only";
+  if (waterFail !== null || (drinksStoredWater && inventory.waterLiters < waterNeeded)) {
     const shortfall = Math.max(0, waterNeeded - inventory.waterLiters);
     add({ id: `${sid}:store-water`, phase: "before", severity: 5, effort: 2, hoursToFailure: waterFail,
       title: `Store about ${Math.ceil(shortfall)} L more water`,
