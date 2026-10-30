@@ -10,8 +10,9 @@ scenario forward hour by hour, following the dependencies in your home, and
 tells you:
 
 - how long you are covered, and which need breaks that cover first;
-- a timeline of what fails when, and why (pump → power, fridge → power →
-  medication, phone → power bank → network);
+- a timeline of what fails when, and under each need the chain that broke
+  (tap → pump → power, medication → fridge → power, calls → phone → power
+  bank), down to the stock that ran out and when;
 - a prioritised list of what to do now, before the next outage, and during it;
 - a one-page printable backup plan.
 
@@ -105,8 +106,13 @@ flowchart LR
    hour at a time. Supplies are switched off by the scenario's hazards, stocks
    are consumed at rates taken from the assumptions (water per person per day,
    phone energy per day, stove hours per day), and the graph is re-evaluated
-   each hour. The first hour a node is unavailable is its failure time, and
-   the graph explains why. The cold chain is modelled explicitly: a closed
+   each hour. The first hour a node is unavailable is its failure time. For
+   every need that fails, the engine records the chain behind it: the
+   capability that stopped, what it needed, and the supply the scenario
+   switched off or the stock that ran out, with the hour. The app shows that
+   chain under each failing need, so "drinking water fails at 20 h" comes
+   with "the tap stopped at once because the pump needs power, and 12 L of
+   stored water ran out at 20 h". The cold chain is modelled explicitly: a closed
    fridge keeps 4 hours of cold, perishables are written off 4 hours after
    that, a freezer thaws at 24 or 48 hours depending on how full it is, and
    insulin gets a 28-day room-temperature window unless there is extreme heat.
@@ -117,9 +123,10 @@ flowchart LR
    above a comfort item that opens in four days. Task ids are stable, so
    ticking one off survives re-running the simulation.
 
-The engine has no DOM dependency and is covered by 23 `node:test` cases
+The engine has no DOM dependency and is covered by 28 `node:test` cases
 (`tests/`): graph evaluation, depletion arithmetic, cold-chain timing,
-phone/power-bank energy, overrides, and task ordering.
+phone/power-bank energy, the failure chains, homes on bottled water,
+overrides, and task ordering.
 
 ## Assumptions and sources
 
@@ -194,7 +201,8 @@ check that the live URL answers.
 - Generators are modelled as litres per hour with no load profile; solar and
   home batteries are not modelled yet.
 - "Buying supplies" assumes shops take cash during an outage and are open
-  unless the scenario closes them.
+  unless the scenario closes them, and that a home on bottled water can buy
+  more while that holds.
 - Emergency numbers are not pre-filled: they differ by country and change, so
   the printed plan leaves a line for you to write yours.
 - Translations and a readiness score over time are not implemented.
