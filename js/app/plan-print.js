@@ -1,4 +1,4 @@
-import { SCENARIOS, formatHours, runScenario } from "../engine/index.js";
+import { SCENARIOS, formatHours, headlineNeed, runScenario } from "../engine/index.js";
 import { html, mount, raw } from "./ui.js";
 /** The printable backup plan: contacts, key numbers, what fails first, what to do. */
 export function renderPrintPlan(root, plan) {
@@ -44,7 +44,7 @@ export function renderPrintPlan(root, plan) {
           <dt>Light</dt><dd>${inv.flashlights} flashlight${inv.flashlights === 1 ? "" : "s"}, ${inv.spareBatteries} spare batteries</dd>
           <dt>Radio</dt><dd>${inv.batteryRadio ? "yes" : "none"}</dd>
           <dt>Cooking</dt><dd>${hh.home.cooking}${hh.home.cooking === "camp-stove" ? ` (${inv.cookingFuelHours} h fuel)` : ""}</dd>
-          <dt>Water supply</dt><dd>${hh.home.waterSupply === "electric-pump" ? "electric pump (stops with the power)" : hh.home.waterSupply}</dd>
+          <dt>Water supply</dt><dd>${hh.home.waterSupply === "electric-pump" ? "electric pump (stops with the power)" : hh.home.waterSupply === "bottled-only" ? "bottled water only" : "mains pressure or gravity tank"}</dd>
           <dt>Vehicle</dt><dd>${inv.vehicle.present ? `fuel ${Math.round(inv.vehicle.fuelFraction * 100)}%` : "none"}</dd>
           <dt>Cash</dt><dd>${inv.cashOnHand || "none"}</dd>
           ${inv.medications.map((m) => html `<dt>${m.label || "Medication"}</dt><dd>${m.dosesPerDay > 0 ? `${Math.floor(m.dosesOnHand / m.dosesPerDay)} days` : `${m.dosesOnHand} doses`}${m.requiresRefrigeration ? ", needs fridge" : ""}</dd>`)}
@@ -55,8 +55,10 @@ export function renderPrintPlan(root, plan) {
       <ul>
         ${reports.map(({ scenario, report }) => {
         const r = report.result;
-        const first = r.failsFirst.find((n) => n.kind === "need" && n.severity >= 3) ?? r.failsFirst[0];
-        return html `<li><strong>${scenario.name}</strong> (${formatHours(r.durationHours)}): ${r.holdsFullDuration ? "covered" : `covered for ${formatHours(r.sustainableHours)}`}${first ? `; first to fail: ${first.label}${first.failsAt === 0 ? " immediately" : ` at ${formatHours(first.failsAt)}`}` : ""}.</li>`;
+        const first = headlineNeed(r);
+        const when = first ? (first.failsAt === 0 ? "from the start" : `at ${formatHours(first.failsAt)}`) : "";
+        const note = !first ? "" : r.holdsFullDuration ? `; not critical: ${first.label} fails ${when}` : `; ${first.label} fails ${when}`;
+        return html `<li><strong>${scenario.name}</strong> (${formatHours(r.durationHours)}): ${r.holdsFullDuration ? "no critical gap" : `covered for ${formatHours(r.sustainableHours)}`}${note}.</li>`;
     })}
       </ul>
 

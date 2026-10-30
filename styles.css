@@ -117,6 +117,16 @@ small, .muted { color: var(--ink-2); }
 .when { flex: 0 0 5.2rem; font-variant-numeric: tabular-nums; font-weight: 650; color: var(--amber); }
 .when.ok { color: var(--green); }
 .when.danger { color: var(--red); }
+.needs > li > div { min-width: 0; flex: 1; }
+.chain { list-style: none; margin: .35rem 0 0; padding: 0 0 0 .7rem; border-left: 2px solid var(--line); }
+.chain .chain { margin-top: .25rem; }
+.chain li { display: block; padding: .2rem 0; border-top: 0; font-size: .93rem; }
+.chain li + li { margin-top: .15rem; }
+.crumbs { display: flex; flex-wrap: wrap; gap: .15rem .4rem; align-items: baseline; }
+.crumbs .arrow { color: var(--ink-3); }
+.crumbs b { font-weight: 600; }
+.crumbs .status { color: var(--ink-2); }
+.chain .hint { margin-top: .1rem; }
 
 /* Scenario cards on the home screen */
 .scenario-grid { display: grid; gap: .75rem; }
@@ -147,7 +157,7 @@ small, .muted { color: var(--ink-2); }
 .timeline text { fill: var(--ink-2); font-size: 12px; }
 .timeline .label { fill: var(--ink); font-size: 13px; font-weight: 600; }
 .timeline.narrow text { font-size: 11.5px; }
-.timeline.narrow .label { font-size: 12px; }
+.timeline.narrow .label { font-size: 12px; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
 .timeline .track { fill: var(--surface-2); stroke: var(--line); }
 .timeline .bar { fill: var(--green); }
 .timeline .bar.fail { fill: var(--amber); }

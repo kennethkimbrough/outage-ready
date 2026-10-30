@@ -1,7 +1,7 @@
 // Cache-first service worker: the whole app is precached on install, so it
 // loads with no network after the first visit. A new build id replaces the
 // cache on the next load.
-const BUILD = "92c7212";
+const BUILD = "0c95998";
 const CACHE = `outage-ready-${BUILD}`;
 const ASSETS = [
   "./",
@@ -21,6 +21,7 @@ const ASSETS = [
   "./js/app/assumptions.js",
   "./js/engine/index.js",
   "./js/engine/types.js",
+  "./js/engine/format.js",
   "./js/engine/assumptions.js",
   "./js/engine/scenarios.js",
   "./js/engine/graph.js",

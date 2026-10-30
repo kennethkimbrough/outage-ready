@@ -3,12 +3,12 @@ export function buildGraph(household, inventory) {
     const add = (n) => nodes.push(n);
     const { home } = household;
     // External supplies. Their status is set by the scenario.
-    add({ id: "grid-power", kind: "supply", label: "Grid power" });
-    add({ id: "tap-water", kind: "supply", label: "Mains water" });
-    add({ id: "mobile-network", kind: "supply", label: "Mobile network" });
-    add({ id: "internet", kind: "supply", label: "Internet" });
-    add({ id: "roads", kind: "supply", label: "Roads open" });
-    add({ id: "shops", kind: "supply", label: "Shops open" });
+    add({ id: "grid-power", kind: "supply", label: "Grid power", reason: "down" });
+    add({ id: "tap-water", kind: "supply", label: "Mains water", reason: "off" });
+    add({ id: "mobile-network", kind: "supply", label: "Mobile network", reason: "down" });
+    add({ id: "internet", kind: "supply", label: "Internet", reason: "down" });
+    add({ id: "roads", kind: "supply", label: "Roads", reason: "closed" });
+    add({ id: "shops", kind: "supply", label: "Shops", reason: "closed" });
     // Stocks. Available while their level is above zero.
     add({ id: "stored-water", kind: "stock", label: "Stored water" });
     add({ id: "nonperishable-food", kind: "stock", label: "Non-perishable food" });
@@ -37,11 +37,20 @@ export function buildGraph(household, inventory) {
         id: "water-at-tap", kind: "capability", label: "Water from the tap", requires: tapReq,
         why: home.waterSupply === "electric-pump" ? "Your water comes through an electric pump, so it stops with the power." : undefined,
     });
-    add({ id: "drinking-water", kind: "capability", label: "Drinking water", requires: { any: ["water-at-tap", "stored-water"] } });
+    if (home.waterSupply === "bottled-only") {
+        add({
+            id: "drinking-water", kind: "capability", label: "Drinking water", requires: { any: ["stored-water", "buying"] },
+            why: "This home drinks bottled water, so the stored supply is used from the first hour unless more can be bought.",
+        });
+    }
+    else {
+        add({ id: "drinking-water", kind: "capability", label: "Drinking water", requires: { any: ["water-at-tap", "stored-water"] } });
+    }
     add({ id: "refrigeration", kind: "capability", label: "Refrigeration", requires: { any: ["home-power", "fridge-cold"] },
         why: "A closed fridge stays cold for a few hours after the power goes; after that it depends on power." });
     const coolingReq = home.cooling === "none" ? { all: ["__never"] } : { all: ["home-power"] };
-    add({ id: "cooling", kind: "capability", label: "Cooling (fan or AC)", requires: coolingReq });
+    add({ id: "cooling", kind: "capability", label: "Cooling (fan or AC)", requires: coolingReq,
+        reason: home.cooling === "none" ? "no fan or air conditioning in this home" : undefined });
     let cookReq;
     if (home.cooking === "electric")
         cookReq = { all: ["home-power"] };
@@ -51,7 +60,8 @@ export function buildGraph(household, inventory) {
         cookReq = { all: ["cooking-fuel"] };
     else
         cookReq = { all: ["__never"] };
-    add({ id: "cooking", kind: "capability", label: "Hot food", requires: cookReq });
+    add({ id: "cooking", kind: "capability", label: "Hot food", requires: cookReq,
+        reason: home.cooking === "none" ? "no way to cook without power" : undefined });
     add({ id: "charged-phone", kind: "capability", label: "A charged phone", requires: { any: ["home-power", "phone-battery", "power-banks"] } });
     add({ id: "communication", kind: "capability", label: "Calls and messages", requires: { all: ["charged-phone", "mobile-network"] } });
     const infoSources = ["communication"];
@@ -60,37 +70,46 @@ export function buildGraph(household, inventory) {
     add({ id: "information", kind: "capability", label: "News and alerts", requires: { any: infoSources } });
     add({ id: "lighting", kind: "capability", label: "Light after dark", requires: { any: ["home-power", "light-batteries", "charged-phone"] } });
     const transportReq = inventory.vehicle.present ? { all: ["vehicle-fuel", "roads"] } : { all: ["__never"] };
-    add({ id: "transport", kind: "capability", label: "Getting around by vehicle", requires: transportReq });
+    add({ id: "transport", kind: "capability", label: "Getting around by vehicle", requires: transportReq,
+        reason: inventory.vehicle.present ? undefined : "no vehicle in the household" });
     add({ id: "buying", kind: "capability", label: "Buying supplies", requires: { all: ["shops", "cash-or-cards"] } });
     add({ id: "cash-or-cards", kind: "capability", label: "A way to pay", requires: { any: ["cash", "home-power"] },
         why: "Card terminals and ATMs need power; cash works without it." });
     add({ id: "food-supply", kind: "capability", label: "Food", requires: { any: ["nonperishable-food", "perishable-food", "buying"] } });
     // Needs.
-    add({ id: "need:hydration", kind: "need", label: "Drinking water for everyone", requires: { all: ["drinking-water"] }, severity: 5 });
-    add({ id: "need:food", kind: "need", label: "Enough food", requires: { all: ["food-supply"] }, severity: 4 });
+    add({ id: "need:hydration", kind: "need", label: "Drinking water for everyone", short: "Drinking water",
+        requires: { all: ["drinking-water"] }, severity: 5 });
+    add({ id: "need:food", kind: "need", label: "Enough food", short: "Food", requires: { all: ["food-supply"] }, severity: 4 });
     for (const m of inventory.medications) {
-        add({ id: `need:med:${m.id}`, kind: "need", label: `${m.label} doses`, requires: { all: [`med:${m.id}`] }, severity: 5 });
+        const name = m.label || "Medication";
+        add({ id: `need:med:${m.id}`, kind: "need", label: `${name} doses`, short: name, requires: { all: [`med:${m.id}`] }, severity: 5 });
         if (m.requiresRefrigeration) {
-            add({ id: `need:cold:${m.id}`, kind: "need", label: `${m.label} kept cool`, requires: { all: ["refrigeration"] }, severity: 5,
-                why: "Refrigerated medication depends on the fridge, which depends on power." });
+            add({ id: `need:cold:${m.id}`, kind: "need", label: `${name} kept cool`, short: `${name} cool`, requires: { all: ["refrigeration"] },
+                severity: 5, why: "Refrigerated medication depends on the fridge, which depends on power." });
         }
     }
     if (household.people.some((p) => p.needsPoweredDevice)) {
-        add({ id: "need:medical-device", kind: "need", label: "Powered medical device", requires: { all: ["home-power"] }, severity: 5 });
+        add({ id: "need:medical-device", kind: "need", label: "Powered medical device", short: "Medical device",
+            requires: { all: ["home-power"] }, severity: 5 });
     }
-    add({ id: "need:food-safety", kind: "need", label: "Fridge food stays safe", requires: { all: ["refrigeration"] }, severity: 2 });
-    add({ id: "need:communication", kind: "need", label: "Reaching family and help", requires: { all: ["communication"] }, severity: 3 });
-    add({ id: "need:information", kind: "need", label: "Knowing what is going on", requires: { all: ["information"] }, severity: 3 });
-    add({ id: "need:light", kind: "need", label: "Light at night", requires: { all: ["lighting"] }, severity: 2 });
-    add({ id: "need:cooking", kind: "need", label: "A hot meal", requires: { all: ["cooking"] }, severity: 2 });
+    add({ id: "need:food-safety", kind: "need", label: "Fridge food stays safe", short: "Fridge food",
+        requires: { all: ["refrigeration"] }, severity: 2 });
+    add({ id: "need:communication", kind: "need", label: "Reaching family and help", short: "Family and help",
+        requires: { all: ["communication"] }, severity: 3 });
+    add({ id: "need:information", kind: "need", label: "Knowing what is going on", short: "News and alerts",
+        requires: { all: ["information"] }, severity: 3 });
+    add({ id: "need:light", kind: "need", label: "Light at night", short: "Light", requires: { all: ["lighting"] }, severity: 2 });
+    add({ id: "need:cooking", kind: "need", label: "A hot meal", short: "Hot meal", requires: { all: ["cooking"] }, severity: 2 });
     if (home.climate === "hot" || household.people.some((p) => p.ageGroup === "older" || p.ageGroup === "infant")) {
-        add({ id: "need:cooling", kind: "need", label: "Staying cool in heat", requires: { all: ["cooling"] }, severity: 4,
-            why: "Older people and infants are most affected by heat without cooling." });
+        add({ id: "need:cooling", kind: "need", label: "Staying cool in heat", short: "Staying cool", requires: { all: ["cooling"] },
+            severity: 4, why: "Older people and infants are most affected by heat without cooling." });
     }
     else {
-        add({ id: "need:cooling", kind: "need", label: "Staying cool in heat", requires: { all: ["cooling"] }, severity: 3 });
+        add({ id: "need:cooling", kind: "need", label: "Staying cool in heat", short: "Staying cool", requires: { all: ["cooling"] },
+            severity: 3 });
     }
-    add({ id: "need:mobility", kind: "need", label: "Able to leave if told to", requires: { all: ["transport"] }, severity: 4 });
+    add({ id: "need:mobility", kind: "need", label: "Able to leave if told to", short: "Able to leave",
+        requires: { all: ["transport"] }, severity: 4 });
     return { nodes: new Map(nodes.map((n) => [n.id, n])) };
 }
 /**
@@ -132,6 +151,29 @@ export function evaluate(graph, supplies, stocks) {
     for (const id of graph.nodes.keys())
         avail(id);
     return memo;
+}
+/**
+ * The direct dependencies that explain why a node is unavailable: every unmet
+ * `all` dependency, and every `any` alternative when none of them is met.
+ * Pseudo-nodes are skipped; a `__never` requirement means the capability does
+ * not exist in this home, which the node's own `reason` describes.
+ */
+export function unmetDependencies(graph, availability, id) {
+    const node = graph.nodes.get(id);
+    if (!node || availability.get(id) || node.kind === "supply" || node.kind === "stock")
+        return [];
+    const req = node.requires ?? {};
+    const out = [];
+    for (const dep of req.all ?? []) {
+        if (!dep.startsWith("__") && !availability.get(dep))
+            out.push(dep);
+    }
+    if (req.any && !req.any.some((d) => availability.get(d) || d === "__always")) {
+        for (const dep of req.any)
+            if (!dep.startsWith("__"))
+                out.push(dep);
+    }
+    return out;
 }
 /** Which unavailable dependencies explain a node being unavailable right now. */
 export function explain(graph, availability, id) {
