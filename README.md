@@ -128,15 +128,15 @@ its source, and can be edited. The defaults:
 
 | Assumption | Value | Source |
 |---|---|---|
-| Water per person per day | 1 gallon (3.785 L) | [Ready.gov — Water](https://www.ready.gov/water) |
-| Water in very hot weather | ×2 | [Ready.gov — Water](https://www.ready.gov/water) |
-| Closed fridge keeps food cold | 4 h | [FDA — Food safety during power outages](https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods) |
+| Water per person per day | 1 gallon (3.785 L) | [Ready.gov: Water](https://www.ready.gov/water) |
+| Water in very hot weather | ×2 | [Ready.gov: Water](https://www.ready.gov/water) |
+| Closed fridge keeps food cold | 4 h | [FDA: Food safety during power outages](https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods) |
 | Full / half-full freezer holds | 48 h / 24 h | FDA, as above |
 | Discard perishables above 40 °F after | 4 h | FDA, as above |
-| Insulin unrefrigerated at 59–86 °F | up to 28 days | [FDA — Insulin storage in an emergency](https://www.fda.gov/drugs/emergency-preparedness-drugs/information-regarding-insulin-storage-and-switching-between-products-emergency) |
-| Usable share of a power bank's rated mAh | 0.70 (3.7 V cells, ~82 % converter × ~85 % charging) | [Anker — Why rated capacity is lower than expected](https://service.anker.com/article-description/Why-is-the-Rated-Capacity-of-Power-Banks-Lower-Than-Expected) |
+| Insulin unrefrigerated at 59–86 °F | up to 28 days | [FDA: Insulin storage in an emergency](https://www.fda.gov/drugs/emergency-preparedness-drugs/information-regarding-insulin-storage-and-switching-between-products-emergency) |
+| Usable share of a power bank's rated mAh | 0.70 (3.7 V cells, ~82 % converter × ~85 % charging) | [Anker: Why rated capacity is lower than expected](https://service.anker.com/article-description/Why-is-the-Rated-Capacity-of-Power-Banks-Lower-Than-Expected) |
 | Phone battery | 18.5 Wh | Anker example, as above |
-| Pet water per day | set by you | [CDC — Pet disaster kit](https://www.cdc.gov/healthy-pets/emergency-preparedness/preparedness-kit.html) gives "a two-week supply" but no daily amount |
+| Pet water per day | set by you | [CDC: Pet disaster kit](https://www.cdc.gov/healthy-pets/emergency-preparedness/preparedness-kit.html) gives "a two-week supply" but no daily amount |
 | Phone hours per charge, flashlight hours per battery, light hours per night, stove hours per day | set by you | no official figure; defaults are conservative and marked as such |
 
 Medication is tracked only as days of supply and whether it needs the fridge.

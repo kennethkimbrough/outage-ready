@@ -26,11 +26,11 @@ the time-to-failure. That chain is where Outage Ready differs.
 |---|---|---|---|---|---|
 | [MuhammadNabiyev/ready72](https://github.com/MuhammadNabiyev/ready72) | Household + hazards + stored supplies → checklist, 0–100 readiness score, shopping list, family plan. | "Stress tests": shelter 3 days, week-long outage, 15-minute evacuation, heatwave + blackout, each pass/fail with the shortfall. | A "time machine" simulates 0–14 days of water, food, medication and pet-food consumption. Supply depletion only; no utility or equipment dependencies. | PWA, localStorage, JSON backup. | Next.js, Tailwind, Radix. |
 | [holdTheDoorHoid/ready-reckoner](https://github.com/holdTheDoorHoid/ready-reckoner) | US ZIP/county + household + budget → ranked local hazards with cited frequencies, days of readiness per consequence, month-by-month purchase plan, printable binder. | Hazard → consequence mapping (no power, no safe water, no income). | No time-based simulation described. | Static, offline, no server. | Rust→WASM engine, Svelte. Every number cited, which is the same discipline this project follows. |
-| [Sreenivas-Sadhu-Prabhakara/readykit](https://github.com/Sreenivas-Sadhu-Prabhakara/readykit) | Region-aware checklist with quantities and a reason per item. | By hazard. | No. | 100% offline, printable. | — |
+| [Sreenivas-Sadhu-Prabhakara/readykit](https://github.com/Sreenivas-Sadhu-Prabhakara/readykit) | Region-aware checklist with quantities and a reason per item. | By hazard. | No. | 100% offline, printable. | Not stated. |
 | [TheMooseSaysMoo/bunkerr](https://github.com/TheMooseSaysMoo/bunkerr) | Self-hosted inventory with expiry alerts, barcode scanning, power equipment, Meshtastic node health. | No. | No. | Offline-capable PWA. | Self-hosted server. |
-| [TimoM84/8star-prep](https://github.com/TimoM84/8star-prep) | Supplies, nutrition coverage, expiry reminders, automatic ration planning. | No. | Nutrition coverage in days. | Web app. | — |
-| [geoffreycrofte/kitzy-survival-kit](https://github.com/geoffreycrofte/kitzy-survival-kit) | Survival-bag and stock checklist. | No. | No. | PWA. | — |
-| [aradhya315/NIRANTAR](https://github.com/aradhya315/NIRANTAR) | Offline-first preparedness web app. | — | — | Offline-first. | — |
+| [TimoM84/8star-prep](https://github.com/TimoM84/8star-prep) | Supplies, nutrition coverage, expiry reminders, automatic ration planning. | No. | Nutrition coverage in days. | Web app. | Not stated. |
+| [geoffreycrofte/kitzy-survival-kit](https://github.com/geoffreycrofte/kitzy-survival-kit) | Survival-bag and stock checklist. | No. | No. | PWA. | Not stated. |
+| [aradhya315/NIRANTAR](https://github.com/aradhya315/NIRANTAR) | Offline-first preparedness web app. | Not stated. | Not stated. | Offline-first. | Not stated. |
 
 Several of these are recent and small (zero or single-digit stars), which
 suggests the idea is being rediscovered rather than solved.
