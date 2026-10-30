@@ -2,6 +2,12 @@ import { expect, test, type Page } from "@playwright/test";
 
 const SHOTS = "docs/screenshots";
 
+/** Take a screenshot once the toast has gone, so the docs show the page and not a message. */
+async function shot(page: Page, path: string, fullPage: boolean) {
+  await expect(page.locator("#toast")).not.toHaveClass(/show/, { timeout: 5000 });
+  await page.screenshot({ path, fullPage });
+}
+
 async function loadSample(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Try a sample household" }).click();
@@ -43,20 +49,26 @@ test("walks the intake wizard and lands on the scenarios", async ({ page }, info
   // Two people, 10 L, pumped supply: water lasts 10 / (2 * 3.785) ≈ 1.3 days of the 2-day power scenario.
   await page.getByRole("link", { name: /Power outage/ }).click();
   await expect(page.getByRole("heading", { name: "Covered for 1 day 8 h of 2 days" })).toBeVisible();
-  await expect(page.getByText("Water from the tap")).toBeVisible();
-  if (info.project.name === "mobile") await page.screenshot({ path: `${SHOTS}/scenario-power.png`, fullPage: false });
+  // The chain behind the water failure: the tap stopped because the pump needs power, then the bottles ran out.
+  const water = page.locator(".needs > li", { hasText: "Drinking water for everyone" });
+  await expect(water.getByText("Water from the tap")).toBeVisible();
+  await expect(water.getByText("Grid power")).toBeVisible();
+  await expect(water.getByText("ran out at 1 day 8 h")).toBeVisible();
+  if (info.project.name === "mobile") await shot(page, `${SHOTS}/scenario-power.png`, false);
 });
 
 test("scenario cards, timeline, tasks and print plan render for the sample", async ({ page }, info) => {
   await loadSample(page);
-  const shot = info.project.name === "mobile" ? "mobile" : "desktop";
-  await page.screenshot({ path: `${SHOTS}/home-${shot}.png`, fullPage: false });
+  const size = info.project.name === "mobile" ? "mobile" : "desktop";
+  await shot(page, `${SHOTS}/home-${size}.png`, false);
 
   await page.getByRole("link", { name: /Typhoon or flood/ }).click();
   await expect(page.locator("svg.timeline")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Fails first" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What fails, and why" })).toBeVisible();
+  // Every failing need is listed, including the food that runs out late in the storm.
+  await expect(page.locator(".needs > li", { hasText: "Enough food" }).getByText("lost at 8 h when the fridge warmed")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Do now" })).toBeVisible();
-  await page.screenshot({ path: `${SHOTS}/storm-${shot}.png`, fullPage: true });
+  await shot(page, `${SHOTS}/storm-${size}.png`, true);
 
   // Ticking a task persists across reloads.
   const first = page.locator("input[data-action=task]").first();
@@ -70,7 +82,7 @@ test("scenario cards, timeline, tasks and print plan render for the sample", asy
   await expect(page.getByRole("heading", { name: "Household backup plan" })).toBeVisible();
   await expect(page.getByText("Emergency contacts")).toBeVisible();
   await page.emulateMedia({ media: "print" });
-  await page.screenshot({ path: `${SHOTS}/print-${shot}.png`, fullPage: true });
+  await shot(page, `${SHOTS}/print-${size}.png`, true);
   await page.emulateMedia({ media: "screen" });
 
   await page.goto("/#/assumptions");
@@ -126,6 +138,6 @@ test("still works offline after the first visit", async ({ page, context, browse
   await expect(page.locator("#offline-badge")).toBeVisible();
   await page.getByRole("link", { name: /Heatwave/ }).click();
   await expect(page.locator("svg.timeline")).toBeVisible();
-  if (info.project.name === "mobile") await page.screenshot({ path: `${SHOTS}/offline-mobile.png`, fullPage: false });
+  if (info.project.name === "mobile") await shot(page, `${SHOTS}/offline-mobile.png`, false);
   await context.setOffline(false);
 });

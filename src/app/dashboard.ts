@@ -1,5 +1,6 @@
 import {
-  SCENARIOS, formatHours, getScenario, runScenario, type Plan, type ScenarioId, type ScenarioReport, type Task,
+  SCENARIOS, formatHours, getScenario, headlineNeed, runScenario,
+  type Cause, type NodeOutcome, type Plan, type ScenarioId, type ScenarioReport, type Task,
 } from "../engine/index.js";
 import { savePlan } from "./store.js";
 import { timelineSvg, stockSpark } from "./timeline.js";
@@ -13,9 +14,18 @@ function verdictClass(report: ScenarioReport): "ok" | "fail" | "danger" {
 
 function headline(report: ScenarioReport): string {
   const r = report.result;
-  if (r.holdsFullDuration) return `Covered for the full ${formatHours(r.durationHours)}`;
+  if (r.holdsFullDuration) return `No critical gap in ${formatHours(r.durationHours)}`;
   if (r.sustainableHours === 0) return "A critical gap from the first hour";
   return `Covered for ${formatHours(r.sustainableHours)} of ${formatHours(r.durationHours)}`;
+}
+
+/** One line naming the need behind the verdict, for the scenario cards. */
+function headlineHint(report: ScenarioReport): string {
+  const r = report.result;
+  const first = headlineNeed(r);
+  if (!first) return "Nothing fails in this window.";
+  const when = first.failsAt === 0 ? "from the start" : `at ${formatHours(first.failsAt!)}`;
+  return r.holdsFullDuration ? `Not critical: ${first.label} fails ${when}.` : `${first.label} fails ${when}.`;
 }
 
 /** Home: one card per scenario with the verdict. */
@@ -31,14 +41,13 @@ export function renderHome(root: Element, plan: Plan): void {
           const cls = verdictClass(report);
           const r = report.result;
           const pct = Math.round((r.sustainableHours / r.durationHours) * 100);
-          const first = r.failsFirst.find((n) => n.kind === "need" && n.severity >= 3) ?? r.failsFirst[0];
           return html`
             <a class="card scenario" href="#/scenario/${scenario.id}">
               <h2>${scenario.name}</h2>
               <div class="hint">${formatHours(r.durationHours)} · ${scenario.hazards.length} thing${scenario.hazards.length === 1 ? "" : "s"} down</div>
               <div class="verdict ${cls}">${headline(report)}</div>
               <div class="meter ${cls}"><i style="width:${pct}%"></i></div>
-              ${first ? html`<div class="hint" style="margin-top:.4rem">First to fail: ${first.label}${first.failsAt === 0 ? " (immediately)" : ` at ${formatHours(first.failsAt!)}`}</div>` : html`<div class="hint" style="margin-top:.4rem">Nothing fails in this window.</div>`}
+              <div class="hint" style="margin-top:.4rem">${headlineHint(report)}</div>
             </a>`;
         })}
       </div>
@@ -77,22 +86,15 @@ export function renderScenario(root: Element, plan: Plan, id: ScenarioId): void 
       <section class="card">
         <h2>What fails when</h2>
         ${timelineSvg(r, Math.max(340, Math.min(640, (root as HTMLElement).clientWidth - 40)))}
-        ${r.failsFirst.length === 0 ? html`<p class="muted">Every need is covered for the whole window.</p>` : ""}
+        ${r.unmetNeeds.length === 0 ? html`<p class="muted">Every need is covered for the whole window.</p>` : ""}
       </section>
 
-      ${r.failsFirst.length ? html`
+      ${r.unmetNeeds.length ? html`
       <section class="card">
-        <h2>Fails first</h2>
-        <ul class="list">
-          ${r.failsFirst.slice(0, 8).map((n) => html`
-            <li>
-              <span class="when ${n.severity >= 4 ? "danger" : ""}">${n.failsAt === 0 ? "now" : formatHours(n.failsAt!)}</span>
-              <div>
-                <div><strong>${n.label}</strong> ${n.kind === "capability" ? html`<span class="badge">capability</span>` : ""}</div>
-                ${n.causes.length ? html`<div class="hint">Because: ${n.causes.join(", ")}</div>` : ""}
-                ${n.why ? html`<div class="hint">${n.why}</div>` : ""}
-              </div>
-            </li>`)}
+        <h2>What fails, and why</h2>
+        <p class="muted">Most serious first. Under each need: the chain it depends on and the link that broke, with arrows pointing from what you lose to what it needed.</p>
+        <ul class="list needs">
+          ${[...r.unmetNeeds].sort((a, b) => b.severity - a.severity || a.failsAt! - b.failsAt!).map((n) => needHtml(n))}
         </ul>
       </section>` : ""}
 
@@ -239,6 +241,49 @@ export function renderChecklist(root: Element, plan: Plan): void {
       toast("Checklist reset");
     }
   });
+}
+
+/** A failing need with the chain behind it. */
+function needHtml(n: NodeOutcome): Raw {
+  return html`
+    <li>
+      <span class="when ${n.severity >= 4 ? "danger" : ""}">${n.failsAt === 0 ? "now" : formatHours(n.failsAt!)}</span>
+      <div>
+        <div><strong>${n.label}</strong> <span class="badge">${severityWord(n.severity).toLowerCase()}</span></div>
+        ${n.because.length ? chainHtml(n.because) : n.reason ? html`<div class="hint">${capitalize(n.reason)}.</div>` : ""}
+        ${n.why ? html`<div class="hint">${n.why}</div>` : ""}
+      </div>
+    </li>`;
+}
+
+function chainHtml(causes: Cause[]): Raw {
+  return html`<ul class="chain">${causes.map(causeHtml)}</ul>`;
+}
+
+/** One link per line; a run of single dependencies collapses into one breadcrumb. */
+function causeHtml(cause: Cause): Raw {
+  const links: Cause[] = [cause];
+  let last = cause;
+  while (last.children.length === 1) { last = last.children[0]!; links.push(last); }
+  const crumbs = links.map((l, i) => linkHtml(l, i === 0 || i === links.length - 1));
+  const whys = links.map((l) => l.why).filter((w): w is string => !!w);
+  return html`
+    <li>
+      <div class="crumbs">${crumbs.map((c, i) => i ? html`<span class="arrow" aria-label="needed">←</span>${c}` : c)}</div>
+      ${whys.map((w) => html`<div class="hint">${w}</div>`)}
+      ${last.children.length > 1 ? chainHtml(last.children) : ""}
+    </li>`;
+}
+
+function linkHtml(l: Cause, withStatus: boolean): Raw {
+  const status = l.kind === "supply" ? l.reason
+    : l.kind === "stock" ? [l.amount, l.reason].filter(Boolean).join(", ")
+    : l.reason ?? (l.failsAt === 0 ? "from the start" : `from ${formatHours(l.failsAt)}`);
+  return html`<span class="link"><b>${l.label}</b>${withStatus && status ? html` <span class="status">${status}</span>` : ""}</span>`;
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function severityWord(s: number): string {
