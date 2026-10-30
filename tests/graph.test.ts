@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildGraph, evaluate, explain } from "../src/engine/graph.js";
+import { buildGraph, evaluate, explain, unmetDependencies } from "../src/engine/graph.js";
 import { emptyHousehold, emptyInventory } from "../src/engine/sample.js";
 
 const allUp = { "grid-power": true, "tap-water": true, "mobile-network": true, internet: true, roads: true, shops: true };
@@ -58,4 +58,24 @@ test("a battery radio keeps information available without the network", () => {
   assert.equal(evaluate(buildGraph(hh, inv), down, stocks).get("need:information"), false);
   inv.batteryRadio = true;
   assert.equal(evaluate(buildGraph(hh, inv), down, stocks).get("need:information"), true);
+});
+
+test("unmet dependencies follow the all/any rules and skip pseudo-nodes", () => {
+  const hh = emptyHousehold();
+  hh.home.waterSupply = "electric-pump";
+  hh.home.cooling = "none";
+  const inv = emptyInventory();
+  const g = buildGraph(hh, inv);
+  const a = evaluate(g, { ...allUp, "grid-power": false }, { ...stocks, "stored-water": false });
+  // The tap needs both mains water and home power; only power is missing.
+  assert.deepEqual(unmetDependencies(g, a, "water-at-tap"), ["home-power"]);
+  // Drinking water had two alternatives and both are gone.
+  assert.deepEqual(unmetDependencies(g, a, "drinking-water"), ["water-at-tap", "stored-water"]);
+  // A capability that can never exist here has no dependencies to blame, only its reason.
+  assert.deepEqual(unmetDependencies(g, a, "cooling"), []);
+  assert.equal(g.nodes.get("cooling")!.reason, "no fan or air conditioning in this home");
+  // Available nodes and leaves have nothing unmet.
+  assert.deepEqual(unmetDependencies(g, a, "home-power"), ["grid-power"]);
+  assert.deepEqual(unmetDependencies(g, a, "grid-power"), []);
+  assert.deepEqual(unmetDependencies(g, a, "need:food"), []);
 });

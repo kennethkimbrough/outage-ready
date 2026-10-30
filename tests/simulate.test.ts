@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { simulate } from "../src/engine/simulate.js";
+import { headlineNeed, simulate } from "../src/engine/simulate.js";
 import { getScenario } from "../src/engine/scenarios.js";
 import { emptyHousehold, emptyInventory, samplePlan } from "../src/engine/sample.js";
 
@@ -134,4 +134,57 @@ test("overrides change the simulation", () => {
   assert.ok(thirsty.sustainableHours < base.sustainableHours);
   const ignored = simulate(hh, inv, getScenario("water", 240), { "not.a.key": 5, "water.litersPerPersonPerDay": -1 });
   assert.equal(ignored.sustainableHours, base.sustainableHours);
+});
+
+test("each failing need carries the chain behind it, down to what ran out and when", () => {
+  const plan = samplePlan(); // electric pump, 12 L stored, two people in a hot climate
+  const r = simulate(plan.household, plan.inventory, getScenario("power", 48));
+  const water = r.unmetNeeds.find((n) => n.id === "need:hydration")!;
+  assert.equal(water.failsAt, 20);
+  // The need's capability had two sources: the tap, lost at once because the pump needs power, and the stored water.
+  const [tap, stored] = water.because;
+  assert.equal(tap!.id, "water-at-tap");
+  assert.equal(tap!.failsAt, 0);
+  assert.match(tap!.why!, /electric pump/);
+  assert.deepEqual(tap!.children.map((c) => c.id), ["home-power"]);
+  assert.deepEqual(tap!.children[0]!.children.map((c) => [c.id, c.reason]), [["grid-power", "down"]]);
+  assert.equal(stored!.id, "stored-water");
+  assert.equal(stored!.amount, "12 L");
+  assert.equal(stored!.reason, "ran out at 20 h");
+  assert.deepEqual(stored!.children, []);
+
+  // A stock that was never there says so, and food lost to a warm fridge says when.
+  const storm = simulate(plan.household, plan.inventory, getScenario("storm", 96));
+  const food = storm.unmetNeeds.find((n) => n.id === "need:food")!;
+  const byId = Object.fromEntries(food.because.map((c) => [c.id, c]));
+  assert.equal(byId["perishable-food"]!.reason, "lost at 8 h when the fridge warmed");
+  assert.equal(byId["nonperishable-food"]!.reason, "ran out at 2 days 8 h");
+  const pay = byId["buying"]!.children.find((c) => c.id === "cash-or-cards")!;
+  assert.equal(pay.children.find((c) => c.id === "cash")!.reason, "none on hand");
+  // Needs that hold have no chain.
+  assert.deepEqual(r.nodes.find((n) => n.id === "need:light")!.because, []);
+});
+
+test("a need the home can never meet says why instead of giving a chain", () => {
+  const hh = emptyHousehold();
+  hh.home.cooling = "none";
+  const inv = emptyInventory();
+  const r = simulate(hh, inv, getScenario("heat-power", 24));
+  const cooling = r.unmetNeeds.find((n) => n.id === "need:cooling")!;
+  assert.equal(cooling.failsAt, 0);
+  assert.deepEqual(cooling.because, []);
+  assert.equal(cooling.reason, "no fan or air conditioning in this home");
+});
+
+test("the headline need is the earliest critical one, or the earliest of any kind when nothing critical fails", () => {
+  const plan = samplePlan();
+  const storm = simulate(plan.household, plan.inventory, getScenario("storm", 96));
+  // Reaching family fails at once but is not critical; water at 20 h is.
+  assert.equal(storm.unmetNeeds[0]!.id, "need:communication");
+  assert.equal(headlineNeed(storm)!.id, "need:hydration");
+  const comms = simulate(plan.household, plan.inventory, getScenario("comms", 24));
+  assert.equal(comms.holdsFullDuration, true);
+  assert.equal(headlineNeed(comms)!.id, "need:communication");
+  const quiet = simulate(emptyHousehold(), { ...emptyInventory(), waterLiters: 100 }, getScenario("water", 24));
+  assert.equal(headlineNeed(quiet), null);
 });
