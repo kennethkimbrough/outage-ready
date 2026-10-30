@@ -1,9 +1,9 @@
 import { assumptionMap } from "./assumptions.js";
 const SRC = {
-    water: { title: "Ready.gov — Water", url: "https://www.ready.gov/water" },
-    fda: { title: "FDA — Food safety during power outages", url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods" },
-    insulin: { title: "FDA — Insulin storage in an emergency", url: "https://www.fda.gov/drugs/emergency-preparedness-drugs/information-regarding-insulin-storage-and-switching-between-products-emergency" },
-    pets: { title: "CDC — Pet disaster kit", url: "https://www.cdc.gov/healthy-pets/emergency-preparedness/preparedness-kit.html" },
+    water: { title: "Ready.gov: Water", url: "https://www.ready.gov/water" },
+    fda: { title: "FDA: Food safety during power outages", url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods" },
+    insulin: { title: "FDA: Insulin storage in an emergency", url: "https://www.fda.gov/drugs/emergency-preparedness-drugs/information-regarding-insulin-storage-and-switching-between-products-emergency" },
+    pets: { title: "CDC: Pet disaster kit", url: "https://www.cdc.gov/healthy-pets/emergency-preparedness/preparedness-kit.html" },
 };
 const PHASE_ORDER = { now: 0, before: 1, during: 2 };
 export function scoreTask(severity, hoursToFailure, effort) {
