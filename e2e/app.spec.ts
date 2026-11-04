@@ -17,6 +17,9 @@ async function loadSample(page: Page) {
 test("walks the intake wizard and lands on the scenarios", async ({ page }, info) => {
   await page.goto("/");
   await expect(page.getByText("Know what you can sustain")).toBeVisible();
+  // The first screen shows a worked example, simulated from the sample household.
+  await expect(page.getByText("Drinking water for everyone fails at 20 h.")).toBeVisible();
+  await expect(page.locator(".preview svg.timeline")).toBeVisible();
   await page.getByRole("link", { name: "Start with my household" }).click();
   await expect(page.getByRole("heading", { name: "Who lives here?" })).toBeVisible();
   await page.getByRole("button", { name: "Add a person" }).click();

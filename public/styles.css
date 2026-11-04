@@ -101,6 +101,25 @@ small, .muted { color: var(--ink-2); }
 
 .page { max-width: 44rem; margin: 0 auto; padding: 1.25rem 1rem 2rem; }
 .page > section + section { margin-top: 1.5rem; }
+.welcome { padding: .75rem 0 .25rem; }
+.welcome .kicker { font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); }
+.welcome h1 { font-size: clamp(1.9rem, 6vw, 2.6rem); line-height: 1.08; letter-spacing: -.02em; margin: .4rem 0 .7rem; }
+.welcome .lead { font-size: 1.08rem; color: var(--ink-2); margin: 0 0 1.1rem; }
+.points { list-style: none; padding: 0; margin: 1.4rem 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.points li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: .8rem .9rem; }
+.points b { display: block; font-size: 1.05rem; color: var(--accent); }
+.points span { font-size: .9rem; color: var(--ink-2); }
+@media (max-width: 560px) {
+  .points { grid-template-columns: 1fr; gap: .4rem; margin-top: 1rem; }
+  .points li { display: flex; gap: .5rem; align-items: baseline; padding: .5rem .75rem; }
+  .points b { font-size: .95rem; white-space: nowrap; }
+  .points span { font-size: .85rem; }
+}
+.preview { border-left: 4px solid var(--red); }
+.preview-head { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: .6rem; }
+.preview h2 { color: var(--red); }
+.preview-why { margin: .75rem 0 .5rem; color: var(--ink-2); font-size: .95rem; }
+.preview-why strong { color: var(--ink); }
 
 /* Cards and lists */
 .card {
