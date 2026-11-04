@@ -1,7 +1,8 @@
-import { SCENARIOS, samplePlan } from "../engine/index.js";
+import { SCENARIOS, formatHours, headlineNeed, runScenario, samplePlan } from "../engine/index.js";
 import { renderAssumptions, renderData } from "./assumptions.js";
 import { renderChecklist, renderHome, renderScenario } from "./dashboard.js";
 import { renderPrintPlan } from "./plan-print.js";
+import { timelineSvg } from "./timeline.js";
 import { hasSetup, loadPlan, savePlan } from "./store.js";
 import { html, mount, toast } from "./ui.js";
 import { parseStep, renderWizard } from "./wizard.js";
@@ -16,20 +17,56 @@ function setCurrentNav(route) {
     }
 }
 function renderWelcome(root) {
+    // A worked example, simulated live from the sample household, so a first-time
+    // visitor sees what the app produces before entering anything.
+    const sample = samplePlan();
+    const { result } = runScenario(sample, "power");
+    const need = headlineNeed(result);
+    const width = Math.max(320, Math.min(640, root.clientWidth - 40));
+    const pct = Math.round((result.sustainableHours / result.durationHours) * 100);
+    // "Water from the tap stopped at once (grid power down) · Stored water (12 L) ran out at 20 h"
+    const leaf = (c) => (c.children.length === 1 ? leaf(c.children[0]) : c);
+    const phrase = (c) => {
+        if (c.kind === "stock")
+            return `${c.label}${c.amount ? ` (${c.amount})` : ""} ${c.reason ?? "ran out"}`;
+        if (c.reason)
+            return `${c.label}: ${c.reason}`;
+        const root = leaf(c);
+        const when = c.failsAt === 0 ? "stopped at once" : `stopped at ${formatHours(c.failsAt)}`;
+        return `${c.label} ${when}${root !== c ? ` (${root.label.toLowerCase()} ${root.reason ?? "unavailable"})` : ""}`;
+    };
+    const chain = need?.because.map((c, i) => (i ? phrase(c).charAt(0).toLowerCase() + phrase(c).slice(1) : phrase(c))).join(", and ") ?? "";
     mount(root, html `
-    <section class="card empty">
-      <h2>Know what you can sustain before the lights go out</h2>
-      <p>Tell Outage Ready what your household has on hand. It works out how long each thing lasts in a power cut, a water outage, a heatwave, a storm or an evacuation, what fails first, and what to do about it. Everything stays on this device and keeps working with no signal.</p>
-      <div class="btn-row" style="justify-content:center">
+    <section class="welcome">
+      <div class="kicker">Household outage planner</div>
+      <h1>Know what you can sustain before the lights go out</h1>
+      <p class="lead">Tell Outage Ready what your home has on hand. It plays a power cut, a water outage, a heatwave, a storm and an evacuation forward hour by hour, and shows how long you are covered, what fails first and why, and what to do now.</p>
+      <div class="btn-row">
         <a class="btn primary" href="#/setup">Start with my household</a>
         <button class="btn" data-action="sample">Try a sample household</button>
       </div>
+      <ul class="points">
+        <li><b>6 scenarios</b><span>simulated hour by hour, each from 6 hours to 2 weeks</span></li>
+        <li><b>The reason</b><span>behind every failure, traced back to what ran out</span></li>
+        <li><b>Offline</b><span>after the first visit; your data never leaves this device</span></li>
+      </ul>
+    </section>
+    <section class="card preview" aria-label="Example result">
+      <div class="preview-head">
+        <span class="badge">Example</span>
+        <span class="hint">Two adults in a 4th-floor apartment whose water comes from an electric pump</span>
+      </div>
+      <h2>${result.scenarioName}: covered for ${formatHours(result.sustainableHours)} of ${formatHours(result.durationHours)}</h2>
+      <div class="meter danger"><i style="width:${pct}%"></i></div>
+      ${need ? html `<p class="preview-why"><strong>${need.label} fails at ${formatHours(need.failsAt)}.</strong> ${chain ? html `${chain}.` : ""}</p>` : ""}
+      ${timelineSvg(result, width)}
+      <div class="btn-row"><button class="btn" data-action="sample">Explore this example</button></div>
     </section>`);
-    root.querySelector("[data-action=sample]")?.addEventListener("click", async () => {
+    root.querySelectorAll("[data-action=sample]").forEach((el) => el.addEventListener("click", async () => {
         await savePlan(samplePlan());
         toast("Sample household loaded");
         void route();
-    });
+    }));
 }
 async function route() {
     const plan = await loadPlan();
